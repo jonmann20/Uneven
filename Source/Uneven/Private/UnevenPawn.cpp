@@ -97,7 +97,7 @@ void AUnevenPawn::ThrustInput(float Val)
 void AUnevenPawn::MoveUpInput(float Val)
 {
 	// Target pitch speed is based in input
-	float TargetPitchSpeed = (Val * TurnSpeed * -1.f);
+	float TargetPitchSpeed = (Val * TurnSpeed);
 
 	// When steering, we decrease pitch slightly
 	TargetPitchSpeed += (FMath::Abs(CurrentYawSpeed) * -0.2f);
