@@ -1,40 +1,60 @@
 // Copyright 1998-2014 Epic Games, Inc. All Rights Reserved.
 #pragma once
-#include "GameFramework/Pawn.h"
+
+#include "GameFramework/Character.h"
 #include "UnevenPawn.generated.h"
 
-UCLASS(config=Game)
+UCLASS(Blueprintable)
 class AUnevenPawn : public APawn
 {
-public:
 	GENERATED_UCLASS_BODY()
 
-	/** StaticMesh component that will be the visuals for our flying pawn */
-	UPROPERTY(Category=Mesh, VisibleDefaultsOnly, BlueprintReadOnly)
-	TSubobjectPtr<class UStaticMeshComponent> PlaneMesh;
+	/* The mesh component */
+	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly)
+	TSubobjectPtr<class UStaticMeshComponent> ShipMeshComponent;
+	
+	/** The camera */
+	UPROPERTY(Category = Camera, VisibleAnywhere, BlueprintReadOnly)
+	TSubobjectPtr<class UCameraComponent> CameraComponent;
 
-	/** Spring arm that will offset the camera */
-	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly)
-	TSubobjectPtr<class USpringArmComponent> SpringArm;
+	/** Camera boom positioning the camera above the character */
+	UPROPERTY(Category = Camera, VisibleAnywhere, BlueprintReadOnly)
+	TSubobjectPtr<class USpringArmComponent> CameraBoom;
 
-	/** Camera component that will be our viewpoint */
-	UPROPERTY(Category=Camera, VisibleDefaultsOnly, BlueprintReadOnly)
-	TSubobjectPtr<class UCameraComponent> Camera;
+	/** Offset from the ships location to spawn projectiles */
+	UPROPERTY(Category = Gameplay, EditAnywhere, BlueprintReadWrite )
+	FVector GunOffset;
+	
+	/* How fast the weapon will fire */
+	UPROPERTY(Category = Gameplay, EditAnywhere, BlueprintReadWrite)
+	float FireRate;
 
-	// Begin AActor overrides
+	/* The speed our ship moves around the level */
+	UPROPERTY(Category = Gameplay, EditAnywhere, BlueprintReadWrite)
+	float MoveSpeed;
+
+	/** Sound to play each time we fire */
+	UPROPERTY(Category = Audio, EditAnywhere, BlueprintReadWrite)
+	class USoundBase* FireSound;
+
+	// Begin Actor Interface
 	virtual void Tick(float DeltaSeconds) override;
-	virtual void ReceiveHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
-	// End AActor overrides
+	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
+	// End Actor Interface
+
+	/* Fire a shot in the specified direction */
+	void FireShot(FVector FireDirection);
+
+	/* Handler for the fire timer expiry */
+	void ShotTimerExpired();
+
+	// Static names for axis bindings
+	static const FName ShootBinding;
+
+	//static const FName FireForwardBinding;
+	//static const FName FireRightBinding;
 
 protected:
-
-	// Begin APawn overrides
-	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override; // Allows binding actions/axes to functions
-	// End APawn overrides
-
-	/** Bound to the thrust axis */
-	void ThrustInput(float Val);
-	
 	/** Bound to the vertical axis */
 	void MoveUpInput(float Val);
 
@@ -44,19 +64,22 @@ protected:
 private:
 
 	/** How quickly forward speed changes */
-	UPROPERTY(Category=Plane, EditAnywhere)
+	UPROPERTY(Category = Plane, EditAnywhere)
 	float Acceleration;
 
 	/** How quickly pawn can steer */
-	UPROPERTY(Category=Plane, EditAnywhere)
-	float TurnSpeed;
+	UPROPERTY(Category = Plane, EditAnywhere)
+	float TurnSpeedX;
+
+	UPROPERTY(Category = Plane, EditAnywhere)
+	float TurnSpeedY;
 
 	/** Max forward speed */
 	UPROPERTY(Category = Pitch, EditAnywhere)
 	float MaxSpeed;
 
 	/** Min forward speed */
-	UPROPERTY(Category=Yaw, EditAnywhere)
+	UPROPERTY(Category = Yaw, EditAnywhere)
 	float MinSpeed;
 
 	/** Current forward speed */
@@ -70,4 +93,8 @@ private:
 
 	/** Current roll speed */
 	float CurrentRollSpeed;
+
+	/* Flag to control firing  */
+	uint32 bCanFire : 1;
 };
+

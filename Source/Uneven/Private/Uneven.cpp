@@ -3,8 +3,7 @@
 #include "Uneven.h"
 
 
-IMPLEMENT_PRIMARY_GAME_MODULE(FDefaultGameModuleImpl, Uneven, "Uneven");
+IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, Uneven, "Uneven" );
 
-DEFINE_LOG_CATEGORY(LogFlying)
-
+DEFINE_LOG_CATEGORY(LogUneven)
  

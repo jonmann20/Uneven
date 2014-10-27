@@ -4,9 +4,9 @@
 #include "UnevenGameMode.h"
 #include "UnevenPawn.h"
 
-AUnevenGameMode::AUnevenGameMode(const class FPostConstructInitializeProperties& PCIP)
-	: Super(PCIP)
+AUnevenGameMode::AUnevenGameMode(const class FPostConstructInitializeProperties& PCIP) : Super(PCIP)
 {
-	// set default pawn class to our flying pawn
+	// set default pawn class to our character class
 	DefaultPawnClass = AUnevenPawn::StaticClass();
 }
+
