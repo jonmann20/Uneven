@@ -10,9 +10,7 @@ const FName AUnevenPawn::ShootBinding("Shoot");
 //const FName AUnevenPawn::FireForwardBinding("FireForward");
 //const FName AUnevenPawn::FireRightBinding("FireRight");
 
-AUnevenPawn::AUnevenPawn(const class FPostConstructInitializeProperties& PCIP)
-	: Super(PCIP)
-{	
+AUnevenPawn::AUnevenPawn(const class FPostConstructInitializeProperties& PCIP) : Super(PCIP) {	
 	static FName CollisionProfileName(TEXT("Pawn"));	
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> ShipMesh(TEXT("/Game/Meshes/UFO.UFO"));
 	// Create the mesh component
@@ -38,26 +36,23 @@ AUnevenPawn::AUnevenPawn(const class FPostConstructInitializeProperties& PCIP)
 	CameraComponent->AttachTo(CameraBoom, USpringArmComponent::SocketName);
 	CameraComponent->bUsePawnControlRotation = false; // Don't rotate camera with controller
 
-	// Movement
-	MoveSpeed = 1000.0f;
 	// Weapon
-	GunOffset = FVector(290.f, 0.f, 0.f);
 	FireRate = 0.1f;
 	bCanFire = true;
 
-	Acceleration = 1000.f;
+	// Movement
+	Acceleration = 1100.f;
 	TurnSpeedX = 88.f;
 	TurnSpeedY = 56.f;
-	MaxSpeed = 4200.f;
+	MaxSpeed = 4100.f;
 	MinSpeed = 420.f;
 	CurrentForwardSpeed = 950.f;
 }
 
-void AUnevenPawn::SetupPlayerInputComponent(class UInputComponent* InputComponent)
-{
+void AUnevenPawn::SetupPlayerInputComponent(class UInputComponent* InputComponent) {
 	check(InputComponent);
 
-	
+	InputComponent->BindAxis("Thrust", this, &AUnevenPawn::ThrustInput);
 	InputComponent->BindAxis("MoveUp", this, &AUnevenPawn::MoveUpInput);
 	InputComponent->BindAxis("MoveRight", this, &AUnevenPawn::MoveRightInput);
 	InputComponent->BindAxis(ShootBinding);
@@ -66,8 +61,7 @@ void AUnevenPawn::SetupPlayerInputComponent(class UInputComponent* InputComponen
 	//InputComponent->BindAxis(FireRightBinding);
 }
 
-void AUnevenPawn::Tick(float DeltaSeconds)
-{
+void AUnevenPawn::Tick(float DeltaSeconds) {
 	const FVector LocalMove = FVector(CurrentForwardSpeed * DeltaSeconds, 0.f, 0.f);
 
 	// Move plan forwards (with sweep so we stop when we collide with things)
@@ -95,8 +89,18 @@ void AUnevenPawn::Tick(float DeltaSeconds)
 	}
 }
 
-void AUnevenPawn::MoveUpInput(float Val)
-{
+void AUnevenPawn::ThrustInput(float Val) {
+	// Is there no input?
+	bool bHasInput = !FMath::IsNearlyEqual(Val, 0.f);
+	// If input is not held down, reduce speed
+	float CurrentAcc = bHasInput ? (Val * Acceleration) : (-0.5f * Acceleration);
+	// Calculate new speed
+	float NewForwardSpeed = CurrentForwardSpeed + (GetWorld()->GetDeltaSeconds() * CurrentAcc);
+	// Clamp between MinSpeed and MaxSpeed
+	CurrentForwardSpeed = FMath::Clamp(NewForwardSpeed, MinSpeed, MaxSpeed);
+}
+
+void AUnevenPawn::MoveUpInput(float Val) {
 	// Target pitch speed is based in input
 	float TargetPitchSpeed = (Val * TurnSpeedY);
 
@@ -107,8 +111,7 @@ void AUnevenPawn::MoveUpInput(float Val)
 	CurrentPitchSpeed = TargetPitchSpeed;//FMath::FInterpTo(CurrentPitchSpeed, TargetPitchSpeed, GetWorld()->GetDeltaSeconds(), 1.f);
 }
 
-void AUnevenPawn::MoveRightInput(float Val)
-{
+void AUnevenPawn::MoveRightInput(float Val) {
 	// Target yaw speed is based on input
 	float TargetYawSpeed = (Val * TurnSpeedX);
 
@@ -116,7 +119,6 @@ void AUnevenPawn::MoveRightInput(float Val)
 
 	// Smoothly interpolate to target yaw speed
 	CurrentYawSpeed = TargetYawSpeed;//FMath::FInterpTo(CurrentYawSpeed, TargetYawSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
-
 
 
 	// Is there any left/right input?
@@ -131,34 +133,36 @@ void AUnevenPawn::MoveRightInput(float Val)
 }
 
 
-void AUnevenPawn::FireShot(FVector FireDirection)
-{
-	if (bCanFire == true)
-	{
-		const FRotator FireRotation = GetActorRotation();
-		// Spawn projectile at an offset from this pawn
-		const FVector SpawnLocation = GetActorLocation() + FireRotation.RotateVector(GunOffset);
+void AUnevenPawn::FireShot(FVector FireDirection) {
+	if(bCanFire == true) {
 
 		UWorld* const World = GetWorld();
-		if (World != NULL)
-		{
-			// spawn the projectile
-			World->SpawnActor<AUnevenProjectile>(SpawnLocation, FireRotation);
+		if(World != NULL) {
+			const FRotator FireRotation = GetActorRotation();
+			
+			// Left Gun
+			World->SpawnActor<AUnevenProjectile>(
+				GetActorLocation() + FireRotation.RotateVector(FVector(275.f, -100.f, -50.f)),
+				FireRotation
+			);
+
+			// Right Gun
+			World->SpawnActor<AUnevenProjectile>(
+				GetActorLocation() + FireRotation.RotateVector(FVector(275.f, 100.f, -50.f)),
+				FireRotation
+			);
 		}
 
 		bCanFire = false;
 		World->GetTimerManager().SetTimer(this, &AUnevenPawn::ShotTimerExpired, FireRate);
 
 		// try and play the sound if specified
-		if (FireSound != nullptr)
-		{
+		if(FireSound != nullptr) {
 			UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 		}
 	}
 }
 
-void AUnevenPawn::ShotTimerExpired()
-{
+void AUnevenPawn::ShotTimerExpired() {
 	bCanFire = true;
 }
-

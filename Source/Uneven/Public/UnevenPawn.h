@@ -5,35 +5,26 @@
 #include "UnevenPawn.generated.h"
 
 UCLASS(Blueprintable)
-class AUnevenPawn : public APawn
-{
+class AUnevenPawn : public APawn {
 	GENERATED_UCLASS_BODY()
 
-	/* The mesh component */
+	// The mesh component
 	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly)
 	TSubobjectPtr<class UStaticMeshComponent> ShipMeshComponent;
 	
-	/** The camera */
+	// The camera
 	UPROPERTY(Category = Camera, VisibleAnywhere, BlueprintReadOnly)
 	TSubobjectPtr<class UCameraComponent> CameraComponent;
 
-	/** Camera boom positioning the camera above the character */
+	// Camera boom positioning the camera above the character
 	UPROPERTY(Category = Camera, VisibleAnywhere, BlueprintReadOnly)
 	TSubobjectPtr<class USpringArmComponent> CameraBoom;
-
-	/** Offset from the ships location to spawn projectiles */
-	UPROPERTY(Category = Gameplay, EditAnywhere, BlueprintReadWrite )
-	FVector GunOffset;
 	
-	/* How fast the weapon will fire */
+	// How fast the weapon will fire
 	UPROPERTY(Category = Gameplay, EditAnywhere, BlueprintReadWrite)
 	float FireRate;
 
-	/* The speed our ship moves around the level */
-	UPROPERTY(Category = Gameplay, EditAnywhere, BlueprintReadWrite)
-	float MoveSpeed;
-
-	/** Sound to play each time we fire */
+	// Sound to play each time we fire
 	UPROPERTY(Category = Audio, EditAnywhere, BlueprintReadWrite)
 	class USoundBase* FireSound;
 
@@ -42,10 +33,10 @@ class AUnevenPawn : public APawn
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 	// End Actor Interface
 
-	/* Fire a shot in the specified direction */
+	// Fire a shot in the specified direction
 	void FireShot(FVector FireDirection);
 
-	/* Handler for the fire timer expiry */
+	// Handler for the fire timer expiry
 	void ShotTimerExpired();
 
 	// Static names for axis bindings
@@ -55,46 +46,44 @@ class AUnevenPawn : public APawn
 	//static const FName FireRightBinding;
 
 protected:
-	/** Bound to the vertical axis */
-	void MoveUpInput(float Val);
-
-	/** Bound to the horizontal axis */
-	void MoveRightInput(float Val);
+	void ThrustInput(float);
+	void MoveUpInput(float);
+	void MoveRightInput(float);
 
 private:
 
-	/** How quickly forward speed changes */
+	// How quickly forward speed changes
 	UPROPERTY(Category = Plane, EditAnywhere)
 	float Acceleration;
 
-	/** How quickly pawn can steer */
+	// How quickly pawn can steer
 	UPROPERTY(Category = Plane, EditAnywhere)
 	float TurnSpeedX;
 
 	UPROPERTY(Category = Plane, EditAnywhere)
 	float TurnSpeedY;
 
-	/** Max forward speed */
+	// Max forward speed
 	UPROPERTY(Category = Pitch, EditAnywhere)
 	float MaxSpeed;
 
-	/** Min forward speed */
+	// Min forward speed
 	UPROPERTY(Category = Yaw, EditAnywhere)
 	float MinSpeed;
 
-	/** Current forward speed */
+	// Current forward speed
 	float CurrentForwardSpeed;
 
-	/** Current yaw speed */
+	// Current yaw speed
 	float CurrentYawSpeed;
 
-	/** Current pitch speed */
+	// Current pitch speed
 	float CurrentPitchSpeed;
 
-	/** Current roll speed */
+	// Current roll speed
 	float CurrentRollSpeed;
 
-	/* Flag to control firing  */
+	// Flag to control firing
 	uint32 bCanFire : 1;
 };
 
