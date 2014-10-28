@@ -82,7 +82,7 @@ void AUnevenPawn::Tick(float DeltaSeconds) {
 	//const FVector FireDirection = FVector(FireForwardValue, FireRightValue, 0.f);
 	const float shootValue = GetInputAxisValue(ShootBinding);
 
-	UE_LOG(LogTemp, Warning, TEXT("shootVal: %f"), shootValue);
+	//UE_LOG(LogTemp, Warning, TEXT("shootVal: %f"), shootValue);
 
 	if (shootValue > 0.f) {
 		FireShot(FVector(0, 0, 0));
